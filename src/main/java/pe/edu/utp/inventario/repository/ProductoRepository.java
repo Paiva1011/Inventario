@@ -9,6 +9,9 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     List<Producto> findByStockLessThan(Integer stock);
 
+    List<Producto> findByNombreContaining(String nombre);
+
+}
 }
 
-//sayely 
+
