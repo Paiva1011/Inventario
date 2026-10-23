@@ -46,4 +46,8 @@ public class ProductoService {
     public void eliminar(Long id) {
         productoRepository.deleteById(id);
     }
+    public List<Producto> buscarPorNombre(String nombre) {
+    return productoRepository.findByNombreContaining(nombre);
+    }
+
 }
