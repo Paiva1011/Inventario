@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pe.edu.utp.inventario.dto.StockBajoResponse;
 import pe.edu.utp.inventario.model.MovimientoInventario;
 import pe.edu.utp.inventario.model.Producto;
 import pe.edu.utp.inventario.repository.MovimientoInventarioRepository;
@@ -13,7 +14,7 @@ import pe.edu.utp.inventario.repository.ProductoRepository;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,14 +32,34 @@ class ReporteServiceTest {
 
     @Test
     void obtenerProductosStockBajo_usaElUmbralDeDiezUnidades() {
-        Producto bajo = Producto.builder().id(1L).nombre("Agua").stock(4).build();
+        when(productoRepository.findByStockLessThan(10)).thenReturn(List.of());
+
+        reporteService.obtenerProductosStockBajo();
+
+        verify(productoRepository).findByStockLessThan(10);
+    }
+
+    @Test
+    void obtenerProductosStockBajo_convierteCadaProductoEnUnaAlerta() {
+        Producto bajo = Producto.builder().id(1L).codigo("P-001").nombre("Agua").stock(4).build();
         when(productoRepository.findByStockLessThan(10)).thenReturn(List.of(bajo));
 
-        List<Producto> resultado = reporteService.obtenerProductosStockBajo();
+        List<StockBajoResponse> resultado = reporteService.obtenerProductosStockBajo();
 
         assertEquals(1, resultado.size());
-        assertSame(bajo, resultado.get(0));
-        verify(productoRepository).findByStockLessThan(10);
+        StockBajoResponse alerta = resultado.get(0);
+        assertEquals(1L, alerta.getId());
+        assertEquals("Agua", alerta.getNombre());
+        assertEquals(4, alerta.getStock());
+        assertEquals("STOCK BAJO", alerta.getEstado());
+        assertEquals("Reabastecer producto inmediatamente", alerta.getAlerta());
+    }
+
+    @Test
+    void obtenerProductosStockBajo_sinProductosDevuelveListaVacia() {
+        when(productoRepository.findByStockLessThan(10)).thenReturn(List.of());
+
+        assertTrue(reporteService.obtenerProductosStockBajo().isEmpty());
     }
 
     @Test

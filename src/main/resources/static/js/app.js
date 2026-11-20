@@ -139,6 +139,7 @@ async function dashboard() {
   const valor = productos.reduce((s, p) => s + (p.precio || 0) * (p.stock || 0), 0);
   const hoy = new Date().toDateString();
   const movHoy = movs.filter(m => m.fecha && new Date(m.fecha).toDateString() === hoy).length;
+  const codigoDe = new Map(productos.map(p => [p.id, p.codigo]));
   const ultimos = [...movs].sort((a, b) => b.id - a.id).slice(0, 8);
   const porReponer = [...bajos].sort((a, b) => a.stock - b.stock).slice(0, 8);
 
@@ -154,7 +155,7 @@ async function dashboard() {
       <section class="panel">
         <h2>Por reponer</h2>
         ${porReponer.length ? `<ul class="restock">${porReponer.map(p => `
-          <li><div><strong>${esc(p.nombre)}</strong><br><small>${esc(p.codigo)}</small></div>
+          <li><div><strong>${esc(p.nombre)}</strong><br><small>${esc(p.codigo ?? codigoDe.get(p.id))}</small></div>
           <div class="num"><strong>${p.stock}</strong> <small>unid.</small></div>
           <div class="meter"><i class="${p.stock <= 0 ? 'zero' : ''}" style="width:${Math.max(4, Math.min(100, p.stock / STOCK_MIN * 100))}%"></i></div></li>`).join('')}</ul>`
           : '<div class="empty"><strong>Todo en orden</strong>Ningún producto está por debajo de ' + STOCK_MIN + ' unidades.</div>'}
@@ -381,7 +382,7 @@ async function usuarios() {
 const REPORTES = {
   bajo: {
     label: 'Stock bajo', url: '/reportes/stock-bajo', file: 'stock-bajo.csv', empty: 'Ningún producto está por debajo de ' + STOCK_MIN + ' unidades.',
-    cols: [['Código', p => p.codigo], ['Producto', p => p.nombre], ['Categoría', p => p.categoria?.nombre || ''], ['Stock', p => p.stock, 'num']]
+    cols: [['Producto', p => p.nombre], ['Stock', p => p.stock, 'num'], ['Estado', p => p.estado || ''], ['Alerta', p => p.alerta || '']]
   },
   inv: {
     label: 'Inventario', url: '/reportes/inventario', file: 'inventario.csv', empty: 'No hay productos registrados.',

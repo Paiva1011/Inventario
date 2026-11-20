@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import pe.edu.utp.inventario.dto.StockBajoResponse;
 import pe.edu.utp.inventario.model.MovimientoInventario;
 import pe.edu.utp.inventario.model.Producto;
 import pe.edu.utp.inventario.service.ReporteService;
@@ -36,14 +37,17 @@ class ReporteControllerTest {
     }
 
     @Test
-    void stockBajo_devuelveLosProductosConPocoStock() throws Exception {
+    void stockBajo_devuelveLasAlertasDeProductosConPocoStock() throws Exception {
         when(reporteService.obtenerProductosStockBajo()).thenReturn(List.of(
-                Producto.builder().id(1L).codigo("P-001").nombre("Agua").stock(4).build()));
+                new StockBajoResponse(1L, "Agua", 4, "STOCK BAJO", "Reabastecer producto inmediatamente")));
 
         mvc.perform(get("/api/reportes/stock-bajo"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].stock").value(4));
+                .andExpect(jsonPath("$[0].nombre").value("Agua"))
+                .andExpect(jsonPath("$[0].stock").value(4))
+                .andExpect(jsonPath("$[0].estado").value("STOCK BAJO"))
+                .andExpect(jsonPath("$[0].alerta").value("Reabastecer producto inmediatamente"));
     }
 
     @Test

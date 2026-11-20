@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pe.edu.utp.inventario.model.MovimientoInventario;
 import pe.edu.utp.inventario.model.Producto;
 import pe.edu.utp.inventario.service.ReporteService;
+import pe.edu.utp.inventario.dto.StockBajoResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -19,8 +20,8 @@ public class ReporteController {
     private final ReporteService reporteService;
 
     @GetMapping("/stock-bajo")
-    public List<Producto> stockBajo() {
-        return reporteService.obtenerProductosStockBajo();
+    public List<StockBajoResponse> stockBajo() {
+    return reporteService.obtenerProductosStockBajo();
     }
 
     @GetMapping("/total-productos")
@@ -40,4 +41,5 @@ public class ReporteController {
     public List<MovimientoInventario> movimientos() {
         return reporteService.obtenerMovimientos();
     }
+    
 }
